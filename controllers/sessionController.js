@@ -34,9 +34,19 @@ exports.createSession = (req, res) => {
 				value: err,
 			});
 		}
-		// Batch.findById(batch_id, (err, batch) => {
-		// 	batch.addSession(doc._id);
-		// });
+		Batch.findById("5fa6bdafd72cb81d08ee451c", (err, batch) => {
+			if (err || !batch) {
+				return res.json({
+					err: "It failed",
+				});
+			}
+			batch.addSession(doc._id);
+			Batch.findByIdAndUpdate(batch._id, batch, (err, savedBatch) => {
+				if (err || !savedBatch) {
+					return res.json({ err: "It Failed" });
+				}
+			});
+		});
 		console.log(doc);
 		return res.json({ _id: doc._id });
 	});
@@ -117,4 +127,36 @@ exports.getAll = (req, res) => {
 		return res.json(doc);
 	});
 	// return res.json();
+};
+
+exports.markComplete = (req, res) => {
+	const errors = validationResult(req);
+
+	if (!errors.isEmpty()) {
+		return res.status(400).json({
+			param: errors.array()[0].param,
+			err: errors.array()[0].msg,
+		});
+	}
+	const { _id } = req.body;
+	console.log(req.body);
+	Session.findById(_id, (err, _session) => {
+		if (err || !_session) {
+			console.log(_session);
+			return res.json({ err: "It failed" });
+		}
+
+		_session.markCompleted();
+		Session.findByIdAndUpdate(
+			_session.id,
+			_session,
+			{ new: true },
+			(_err, _doc) => {
+				if (_err || !_doc) {
+					return res.json({ err: "It failed" });
+				}
+				return res.json({ ok: "Success" });
+			}
+		);
+	});
 };

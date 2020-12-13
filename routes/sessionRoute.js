@@ -6,12 +6,10 @@ const {
 	createSession,
 	addAttendee,
 	getAll,
+	markComplete,
 } = require("../controllers/sessionController");
 
-// router.post(
-//     "/createSession",
-
-// );
+router.post("/markComplete", [check("_id")], markComplete);
 
 router.post(
 	"/createSession",

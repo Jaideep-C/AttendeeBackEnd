@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const crypto = require("crypto");
 const { v4: uuidv4 } = require("uuid");
-const { ObjectId } = mongoose.Schema;
+const { ObjectId, Mixed } = mongoose.Schema;
 
 var userSchema = new mongoose.Schema(
 	{
@@ -95,16 +95,21 @@ userSchema.methods = {
 		var totalSessions = this.attended.count + this.absent.count;
 		var attendedSession = this.attended.count;
 		try {
-			this.attendancePercentage = (totalSessions / attendedSession).toPrecision(
-				3
-			);
+			this.attendancePercentage = (100 * attendedSession) / totalSessions;
 		} catch (error) {
 			console.log(error);
 		}
 	},
 	addSession: function (_id) {
-		this.attended.sessions.push(_id);
+		if (this.attended.sessions.includes(_id) == false) {
+			this.attended.sessions.push(_id);
+		}
 		this.attended.count = this.attended.sessions.length;
+	},
+	addAbsentSession: function (_id) {
+		this.absent.sessions.push(_id);
+		this.absent.count = this.absent.sessions.length;
+		console.log(this.absent);
 	},
 };
 

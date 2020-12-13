@@ -29,7 +29,7 @@ sessionSchema.methods = {
 			this.attendees.push(_id);
 		}
 	},
-	markComplete: function () {
+	markCompleted: function () {
 		this.completed = true;
 	},
 };

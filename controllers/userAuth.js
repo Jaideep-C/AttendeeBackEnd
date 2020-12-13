@@ -1,6 +1,6 @@
 const User = require("../models/user");
 const { validationResult } = require("express-validator");
-
+const Batch = require("../models/batch");
 exports.signUp = (req, res) => {
 	const errors = validationResult(req);
 
@@ -102,10 +102,33 @@ exports.getUser = (req, res) => {
 		if (err || !doc) {
 			return res.json({ err: "Invalid User" });
 		}
-		try {
-			doc.generateAttendancePercentage();
-		} catch (error) {
-			console.log(error);
+		// console.log(doc.attendancePercentage);
+		Batch.findById("5fa6bdafd72cb81d08ee451c", (_err, batch) => {
+			if (_err || !batch) {
+				return res.json({ err: "Invalid User" });
+			}
+			var lis = batch.session.sessions;
+			for (let x of lis) {
+				if (doc.attended.sessions.includes(x) == false) {
+					doc.addAbsentSession(x);
+				}
+			}
+
+			try {
+				doc.generateAttendancePercentage();
+			} catch (error) {
+				console.log(error);
+			}
+			console.log(doc.attendancePercentage);
+			return res.json(doc);
+		});
+	});
+};
+
+exports.getAll = (req, res) => {
+	User.find((err, doc) => {
+		if (err || !doc) {
+			return res.json({ err: "It failed" });
 		}
 		return res.json(doc);
 	});
